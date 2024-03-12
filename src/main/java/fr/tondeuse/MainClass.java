@@ -3,8 +3,11 @@ package fr.tondeuse;
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Logger;
 
 import fr.tondeuse.model.Lawn;
 import fr.tondeuse.model.Mower;
@@ -12,15 +15,17 @@ import fr.tondeuse.model.MowerPosition;
 
 public class MainClass {
 
+	private static final Logger logger = Logger.getLogger(MainClass.class.getName());
+
 	public static void main(String[] args) {
 		List<Mower> mowers = loadMowersFromFile("input.txt");
 		if (mowers != null) {
 			mowers.forEach(mower -> {
 				MowerPosition p = mower.executeInstructionsAndReturnPosition();
-				System.out.println(p.toString());
+				logger.info(p.toString());
 			});
 		} else {
-			System.err.println("Erreur lors de la lecture du fichier");
+			logger.severe("Erreur lors de la lecture du fichier");
 		}
 	}
 
@@ -33,8 +38,10 @@ public class MainClass {
 	 */
 	public static List<Mower> loadMowersFromFile(String fileUrl) {
 		List<Mower> mowers = new ArrayList<>();
+		ClassLoader classLoader = MainClass.class.getClassLoader();
+		URL url = classLoader.getResource("input.txt");
 
-		try (BufferedReader reader = new BufferedReader(new FileReader(fileUrl))) {
+		try (BufferedReader reader = new BufferedReader(new InputStreamReader(url.openStream()))) {
 			String line = reader.readLine();
 			if (line != null) {
 				String[] lawnLimit = line.split(" ");
@@ -58,7 +65,8 @@ public class MainClass {
 				}
 			}
 		} catch (IOException e) {
-			e.printStackTrace();
+			logger.severe("Erreur lors de la lecture du fichier");
+			logger.severe(e.getMessage());
 			return null;
 		}
 
